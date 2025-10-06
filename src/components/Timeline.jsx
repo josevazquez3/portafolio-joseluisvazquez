@@ -1,4 +1,10 @@
+import { Briefcase, Calendar } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+
 const Timeline = () => {
+  const [visibleItems, setVisibleItems] = useState([]);
+  const itemRefs = useRef([]);
+
   const experiences = [
     {
       company: 'Colegio de Médicos de la Provincia de Bs. As. (Consejo Superior)',
@@ -50,47 +56,153 @@ const Timeline = () => {
     }
   ];
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = parseInt(entry.target.dataset.index);
+            setVisibleItems((prev) => [...new Set([...prev, index])]);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    itemRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section id="experiencia" className="min-h-screen bg-black py-20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-16 text-center">
-          Experiencia Laboral
-        </h2>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
+            Experiencia Laboral
+          </h2>
+          <div className="h-1 w-20 bg-white mx-auto"></div>
+        </div>
 
         <div className="relative">
-          <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gray-700"></div>
+          {/* Línea vertical central */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 w-0.5 bg-white hidden md:block"></div>
 
-          {experiences.map((exp, index) => (
-            <div
-              key={index}
-              className={`relative mb-12 ${
-                index % 2 === 0 ? 'md:pr-1/2' : 'md:pl-1/2 md:ml-auto'
-              }`}
-            >
-              <div className={`flex items-center mb-4 ${index % 2 === 0 ? 'md:justify-end' : ''}`}>
-                <div className="relative">
-                  <div className={`absolute left-8 md:left-1/2 w-4 h-4 rounded-full -ml-2 ${
-                    exp.isCurrent ? 'bg-white' : 'bg-gray-600'
-                  } ${exp.isCurrent ? 'animate-pulse' : ''}`}></div>
-                </div>
-              </div>
-
-              <div className={`ml-20 md:ml-0 ${index % 2 === 0 ? 'md:mr-12' : 'md:ml-12'}`}>
-                <div className="bg-gray-900 p-6 rounded-lg shadow-lg hover:shadow-2xl hover:shadow-white/10 transition-all duration-300 transform hover:-translate-y-1">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-xl font-serif text-white pr-4">{exp.company}</h3>
-                    {exp.isCurrent && (
-                      <span className="px-3 py-1 bg-white text-black text-xs rounded-full font-medium whitespace-nowrap">
-                        Actual
-                      </span>
-                    )}
+          {experiences.map((exp, index) => {
+            const isLeft = index % 2 === 0;
+            const isVisible = visibleItems.includes(index);
+            
+            return (
+              <div
+                key={index}
+                ref={(el) => (itemRefs.current[index] = el)}
+                data-index={index}
+                className="relative mb-16 md:mb-20 flex items-center"
+              >
+                {/* Tarjeta izquierda */}
+                {isLeft && (
+                  <div className={`w-full md:w-5/12 transition-all duration-700 transform ${
+                    isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20'
+                  }`}>
+                    <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-white rounded-lg p-6 shadow-lg hover:shadow-2xl hover:shadow-white/20 transition-all duration-500 transform hover:scale-105">
+                      <div className="flex items-start flex-row mb-4">
+                        <div className="flex-shrink-0 w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300 mr-3">
+                          <Briefcase className="text-white" size={20} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-serif text-white mb-2 leading-tight">
+                            {exp.company}
+                          </h3>
+                          <div className="flex items-center text-gray-400 text-sm space-x-2">
+                            <Calendar size={14} />
+                            <span>{exp.period}</span>
+                            {exp.isCurrent && (
+                              <span className="px-3 py-1 bg-white text-black text-xs rounded-full font-medium ml-2">
+                                Actual
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-gray-300 leading-relaxed">
+                        {exp.description}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-gray-400 text-sm mb-3">{exp.period}</p>
-                  <p className="text-gray-300 leading-relaxed">{exp.description}</p>
+                )}
+
+                {/* Espacio vacío izquierdo para elementos de la derecha */}
+                {!isLeft && <div className="hidden md:block w-5/12"></div>}
+
+                {/* Punto central con línea */}
+                <div className="hidden md:flex w-2/12 justify-center items-center relative px-4">
+                  {/* Línea hacia la izquierda */}
+                  {isLeft && (
+                    <div 
+                      className={`absolute right-1/2 mr-2 h-0.5 bg-white transition-all duration-700 ${
+                        isVisible ? 'w-[calc(50%-0.5rem)]' : 'w-0'
+                      }`}
+                    ></div>
+                  )}
+                  
+                  {/* Punto */}
+                  <div className={`w-4 h-4 rounded-full border-2 z-10 transition-all duration-500 ${
+                    isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                  } ${
+                    exp.isCurrent 
+                      ? 'bg-white border-white shadow-lg shadow-white/50 animate-pulse' 
+                      : 'bg-black border-white hover:bg-white'
+                  }`}></div>
+
+                  {/* Línea hacia la derecha */}
+                  {!isLeft && (
+                    <div 
+                      className={`absolute left-1/2 ml-2 h-0.5 bg-white transition-all duration-700 ${
+                        isVisible ? 'w-[calc(50%-0.5rem)]' : 'w-0'
+                      }`}
+                    ></div>
+                  )}
                 </div>
+
+                {/* Tarjeta derecha */}
+                {!isLeft && (
+                  <div className={`w-full md:w-5/12 transition-all duration-700 transform ${
+                    isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20'
+                  }`}>
+                    <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-white rounded-lg p-6 shadow-lg hover:shadow-2xl hover:shadow-white/20 transition-all duration-500 transform hover:scale-105">
+                      <div className="flex items-start flex-row mb-4">
+                        <div className="flex-shrink-0 w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300 mr-3">
+                          <Briefcase className="text-white" size={20} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-serif text-white mb-2 leading-tight">
+                            {exp.company}
+                          </h3>
+                          <div className="flex items-center text-gray-400 text-sm space-x-2">
+                            <Calendar size={14} />
+                            <span>{exp.period}</span>
+                            {exp.isCurrent && (
+                              <span className="px-3 py-1 bg-white text-black text-xs rounded-full font-medium ml-2">
+                                Actual
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-gray-300 leading-relaxed">
+                        {exp.description}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Espacio vacío derecho para elementos de la izquierda */}
+                {isLeft && <div className="hidden md:block w-5/12"></div>}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

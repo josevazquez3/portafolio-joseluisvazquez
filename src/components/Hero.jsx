@@ -3,6 +3,13 @@ const Hero = () => {
     <section id="inicio" className="min-h-screen flex items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
+          <div className="mb-8 flex justify-center">
+            <img 
+              src="/img/fotoperfil.jpeg" 
+              alt="José Luis Vazquez" 
+              className="w-40 h-40 md:w-48 md:h-48 rounded-full object-cover border-4 border-white shadow-2xl"
+            />
+          </div>
           <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-6 animate-fade-in">
             José Luis Vazquez
           </h1>
