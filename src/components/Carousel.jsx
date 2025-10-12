@@ -5,11 +5,11 @@ const Carousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const images = [
-    '/img/slide1.jpg',
-    '/img/slide2.jpg',
-    '/img/slide3.jpg',
-    '/img/slide4.jpg',
-    '/img/slide5.jpg'
+    '/img/carrusel1.jpeg',
+    '/img/carrusel2.jpeg',
+    '/img/carrusel3.jpeg',
+    '/img/carrusel4.jpeg',
+    '/img/carrusel5.jpeg'
   ];
 
   const nextSlide = () => {
@@ -40,7 +40,9 @@ const Carousel = () => {
                   <img
                     src={img}
                     alt={`Slide ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className={`w-full h-full ${
+                      index === 3 || index === 4 ? 'object-contain' : 'object-cover'
+                    }`}
                   />
                 </div>
               ))}
